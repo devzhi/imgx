@@ -29,12 +29,17 @@ func GetToken(imageName string) (*TokenResponse, error) {
 		return nil, err
 	}
 	// 读取响应
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Print("Error while closing response body", err)
+		}
+	}(resp.Body)
 	body, err := io.ReadAll(resp.Body)
 	var tokenResponse TokenResponse
 	err = json.Unmarshal(body, &tokenResponse)
 	if err != nil {
-		fmt.Print("JSON unmarshal error", err)
+		fmt.Print("Error while parsing token response", err)
 		return nil, err
 	}
 	// 返回结果
