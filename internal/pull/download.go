@@ -11,7 +11,7 @@ import (
 )
 
 // DownloadImage 根据提供的manifests下载镜像层和配置
-func DownloadImage(token *TokenResponse, manifests *ManifestsResp, arch string, operateSystem string, imageName string, tag string) (file *os.File, err error) {
+func DownloadImage(token *TokenResponse, manifests *ManifestsResp, arch string, operateSystem string, imageName string, tag string) (path *string, err error) {
 	registryUrl := "https://registry.hub.docker.com/v2"
 	if manifests.MediaType != "application/vnd.oci.image.manifest.v1+json" {
 		fmt.Println("Unsupported manifest type", manifests.MediaType)
@@ -41,9 +41,12 @@ func DownloadImage(token *TokenResponse, manifests *ManifestsResp, arch string, 
 	if err != nil {
 		return nil, err
 	}
-
 	// 创建manifest文件
-	return createManifestFile(manifests.Config, layers, imageName, tag, dir)
+	err = createManifestFile(manifests.Config, layers, imageName, tag, dir)
+	if err != nil {
+		return nil, err
+	}
+	return &dir, nil
 }
 
 // downloadLayer 下载单个层并显示进度条
@@ -124,40 +127,40 @@ func downloadConfig(token *TokenResponse, registryUrl string, config Config, dir
 }
 
 // createManifestFile 创建下载镜像的manifest文件
-func createManifestFile(config Config, layers []Layer, imageName, tag, dir string) (*os.File, error) {
+func createManifestFile(config Config, layers []Layer, imageName, tag, dir string) error {
 	manifestFile, err := os.Create(dir + "/manifest.json")
 	if err != nil {
 		fmt.Println("Error while creating manifest file", err)
-		return nil, err
+		return err
 	}
 	defer manifestFile.Close()
 
 	_, err = manifestFile.WriteString("{\"Config\":\"" + config.Digest + ".json\",\"RepoTags\":[\"" + imageName + ":" + tag + "\"],\"Layers\":[")
 	if err != nil {
 		fmt.Println("Error while writing manifest file", err)
-		return nil, err
+		return err
 	}
 
 	for i, layer := range layers {
 		_, err = manifestFile.WriteString("\"" + layer.Digest + ".tar\"")
 		if err != nil {
 			fmt.Println("Error while writing manifest file", err)
-			return nil, err
+			return err
 		}
 		if i < len(layers)-1 {
 			_, err = manifestFile.WriteString(",")
 			if err != nil {
 				fmt.Println("Error while writing manifest file", err)
-				return nil, err
+				return err
 			}
 		}
 	}
 	_, err = manifestFile.WriteString("]}")
 	if err != nil {
 		fmt.Println("Error while writing manifest file", err)
-		return nil, err
+		return err
 	}
-	return manifestFile, nil
+	return nil
 }
 
 func RemoveImageSaveDir(imageName, tag, arch, operateSystem string) {
