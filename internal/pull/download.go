@@ -135,14 +135,14 @@ func createManifestFile(config Config, layers []Layer, imageName, tag, dir strin
 	}
 	defer manifestFile.Close()
 
-	_, err = manifestFile.WriteString("{\"Config\":\"" + config.Digest + ".json\",\"RepoTags\":[\"" + imageName + ":" + tag + "\"],\"Layers\":[")
+	_, err = manifestFile.WriteString("[{\"Config\":\"" + strings.Split(config.Digest, ":")[1] + ".json\",\"RepoTags\":[\"" + imageName + ":" + tag + "\"],\"Layers\":[")
 	if err != nil {
 		fmt.Println("Error while writing manifest file", err)
 		return err
 	}
 
 	for i, layer := range layers {
-		_, err = manifestFile.WriteString("\"" + layer.Digest + ".tar\"")
+		_, err = manifestFile.WriteString("\"" + strings.Split(layer.Digest, ":")[1] + ".tar\"")
 		if err != nil {
 			fmt.Println("Error while writing manifest file", err)
 			return err
@@ -155,7 +155,7 @@ func createManifestFile(config Config, layers []Layer, imageName, tag, dir strin
 			}
 		}
 	}
-	_, err = manifestFile.WriteString("]}")
+	_, err = manifestFile.WriteString("]}]")
 	if err != nil {
 		fmt.Println("Error while writing manifest file", err)
 		return err
