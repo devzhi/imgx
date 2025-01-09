@@ -51,8 +51,7 @@ func GetManifest(token *TokenResponse, imageName, tag string) (*ManifestsResp, e
 	req.Header.Set("Authorization", "Bearer "+token.Token)
 	req.Header.Set("Accept", "application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.docker.distribution.manifest.v2+json")
 	// 发送请求
-	client := http.Client{}
-	res, err := client.Do(req)
+	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Print("Error while fetching manifest", err)
 		return nil, err
