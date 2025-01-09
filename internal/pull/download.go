@@ -2,6 +2,7 @@ package pull
 
 import (
 	"fmt"
+	"github.com/devzhi/imgx/internal/util"
 	"io"
 	"net/http"
 	"os"
@@ -13,13 +14,13 @@ import (
 // DownloadImage 根据提供的manifests下载镜像层和配置
 func DownloadImage(token *TokenResponse, manifests *ManifestsResp, arch string, operateSystem string, imageName string, tag string) (path *string, err error) {
 	registryUrl := "https://registry.hub.docker.com/v2"
-	if manifests.MediaType != "application/vnd.oci.image.manifest.v1+json" {
+	if manifests.MediaType != "application/vnd.oci.image.manifest.v1+json" && manifests.MediaType != "application/vnd.docker.distribution.manifest.v2+json" {
 		fmt.Println("Unsupported manifest type", manifests.MediaType)
 		return nil, err
 	}
 
 	// 创建镜像目录
-	dir := "./" + imageName + "_" + tag + "_" + arch + "_" + operateSystem
+	dir := "./" + strings.ReplaceAll(imageName, "/", "_") + "_" + tag + "_" + arch + "_" + operateSystem
 	err = os.Mkdir(dir, 0755)
 	if err != nil {
 		fmt.Println("Error while creating directory", err)
@@ -51,7 +52,13 @@ func DownloadImage(token *TokenResponse, manifests *ManifestsResp, arch string, 
 
 // downloadLayer 下载单个层并显示进度条
 func downloadLayer(token *TokenResponse, registryUrl, imageName string, layer Layer, dir string) error {
-	req, err := http.NewRequest("GET", registryUrl+"/library/"+imageName+"/blobs/"+layer.Digest, nil)
+	requestUrl := registryUrl
+	if util.IsOfficialImage(imageName) {
+		requestUrl = requestUrl + "/library/" + imageName + "/blobs/" + layer.Digest
+	} else {
+		requestUrl = requestUrl + "/" + imageName + "/blobs/" + layer.Digest
+	}
+	req, err := http.NewRequest("GET", requestUrl, nil)
 	if err != nil {
 		fmt.Println("Error while creating layer request", err)
 		return err
@@ -90,7 +97,13 @@ func downloadLayer(token *TokenResponse, registryUrl, imageName string, layer La
 
 // downloadConfig 下载配置文件
 func downloadConfig(token *TokenResponse, registryUrl string, config Config, dir string, imageName string) error {
-	req, err := http.NewRequest("GET", registryUrl+"/library/"+imageName+"/blobs/"+config.Digest, nil)
+	requestUrl := registryUrl
+	if util.IsOfficialImage(imageName) {
+		requestUrl = requestUrl + "/library/" + imageName + "/blobs/" + config.Digest
+	} else {
+		requestUrl = requestUrl + "/" + imageName + "/blobs/" + config.Digest
+	}
+	req, err := http.NewRequest("GET", requestUrl, nil)
 	if err != nil {
 		fmt.Println("Error while creating config request", err)
 		return err
@@ -164,7 +177,7 @@ func createManifestFile(config Config, layers []Layer, imageName, tag, dir strin
 }
 
 func RemoveImageSaveDir(imageName, tag, arch, operateSystem string) {
-	dir := "./" + imageName + "_" + tag + "_" + arch + "_" + operateSystem
+	dir := "./" + strings.ReplaceAll(imageName, "/", "_") + "_" + tag + "_" + arch + "_" + operateSystem
 	err := os.RemoveAll(dir)
 	if err != nil {
 		fmt.Println("Error while removing directory", err)

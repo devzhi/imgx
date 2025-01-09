@@ -3,6 +3,7 @@ package pull
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/devzhi/imgx/internal/util"
 	"io"
 	"net/http"
 )
@@ -56,8 +57,13 @@ type Layer struct {
 
 func GetManifest(token *TokenResponse, imageName, tag string, arch string, os string) (*ManifestsResp, error) {
 	// 构建请求
-	registryUrl := "https://registry.hub.docker.com/v2"
-	req, err := http.NewRequest("GET", registryUrl+"/library/"+imageName+"/manifests/"+tag, nil)
+	registryUrl := "https://registry.hub.docker.com/v2/"
+	if util.IsOfficialImage(imageName) {
+		registryUrl = registryUrl + "library/" + imageName
+	} else {
+		registryUrl = registryUrl + imageName
+	}
+	req, err := http.NewRequest("GET", registryUrl+"/manifests/"+tag, nil)
 	if err != nil {
 		fmt.Print("Error while creating manifest request", err)
 		return nil, err
@@ -77,7 +83,7 @@ func GetManifest(token *TokenResponse, imageName, tag string, arch string, os st
 	var resp ManifestsResp
 	err = json.Unmarshal(body, &resp)
 	if err != nil {
-		fmt.Print("Error while parsing manifest response", err)
+		fmt.Print("Error while parsing manifest response ", err)
 		return nil, err
 	}
 	// 查找当前架构的manifest

@@ -8,13 +8,14 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Package 打包为可load镜像
 func Package(path string, imageName string, tag string, arch string, operateSystem string, outputFile *string) (*string, error) {
 	// 确定打包文件名
 	if outputFile == nil {
-		defaultOutputFile := imageName + "_" + tag + "_" + arch + "_" + operateSystem + ".tar.gz"
+		defaultOutputFile := strings.ReplaceAll(imageName, "/", "_") + "_" + tag + "_" + arch + "_" + operateSystem + ".tar.gz"
 		outputFile = &defaultOutputFile
 	}
 	// 创建镜像包

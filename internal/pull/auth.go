@@ -3,6 +3,7 @@ package pull
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/devzhi/imgx/internal/util"
 	"io"
 	"net/http"
 	"time"
@@ -20,7 +21,11 @@ func GetToken(imageName string) (*TokenResponse, error) {
 	authUrl := "https://auth.docker.io/token"
 	params := map[string]string{
 		"service": "registry.docker.io",
-		"scope":   "repository:library/" + imageName + ":pull",
+	}
+	if util.IsOfficialImage(imageName) {
+		params["scope"] = "repository:library/" + imageName + ":pull"
+	} else {
+		params["scope"] = "repository:" + imageName + ":pull"
 	}
 	// 发送请求
 	resp, err := http.Get(authUrl + "?service=" + params["service"] + "&scope=" + params["scope"])
