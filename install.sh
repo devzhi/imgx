@@ -24,9 +24,17 @@ arch=$(uname -m)
 # 下载地址
 download_url="https://github.com/devzhi/imgx/releases/download/${latest_version}/imgx_${latest_version#v}_${os}_${arch}.tar.gz"
 
-# 下载并安装
+# 下载并安装到/opt/imgx
 echo "正在下载 imgx ${latest_version} ..."
-curl -sL ${download_url} | tar xzf - -C /usr/local/bin
+curl -sL ${download_url} | tar xzf - -C /opt/imgx/
+
+if [ $? -ne 0 ]; then
+    echo "imgx ${latest_version} 安装失败"
+    exit 1
+fi
+
+# 创建软连接到/usr/local/bin
+sudo ln -sf /opt/imgx/imgx /usr/local/bin/imgx
 
 if [ $? -eq 0 ]; then
     echo "imgx ${latest_version} 安装成功"
