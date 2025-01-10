@@ -28,7 +28,7 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		version := "v0.0.5"
+		version := "0.0.7"
 		fmt.Println("imgx version", version)
 		return
 	}
