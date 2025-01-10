@@ -6,6 +6,17 @@ if [ ! -w /usr/local/bin ]; then
     exit 1
 fi
 
+# 检查/opt/imgx目录是否可写
+if [ ! -w /opt/imgx ]; then
+    echo "/opt/imgx 目录不可写，请使用 sudo 或 root 用户运行此脚本"
+    exit 1
+fi
+
+# 检查/opt/imgx目录是否存在，不存在则创建
+if [ ! -d /opt/imgx ]; then
+    sudo mkdir -p /opt/imgx
+fi
+
 # 检查是否安装了 curl
 if ! command -v curl &> /dev/null; then
     echo "请先安装 curl"
