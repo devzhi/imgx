@@ -72,3 +72,14 @@ imgx -name nginx -tag latest -arch arm64 -os linux
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=devzhi/imgx&type=Date)](https://star-history.com/#devzhi/imgx&Date)
+
+## 免责声明
+
+本开源项目（imgx）是依据 [Apache License 2.0](https://github.com/devzhi/MessageRouter/blob/main/LICENSE) 许可证授权发布，旨在为开发者社区提供有益的工具、代码或资源，以促进技术创新与共享。
+
+使用者应知悉并同意：
+
+1. 本项目仅用于合法合规的目的，严禁将本项目的任何部分用于任何非法活动，包括但不限于未经授权的访问、数据窃取、恶意软件传播、侵犯他人知识产权或违反法律法规的行为。若使用者违反此规定，造成的一切后果与法律责任将由使用者自行承担，与本项目的开发者及贡献者无关。
+2. 本项目按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对项目的适用性、准确性、可靠性、完整性以及不侵权的保证。使用者在使用本项目时应自行承担风险，开发者及贡献者不对因使用本项目而产生的任何直接或间接损失负责。
+
+请在使用本开源项目前仔细阅读并理解本免责声明，若您选择使用本项目，即表示您已接受上述条款。
