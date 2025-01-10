@@ -26,7 +26,7 @@ download_url="https://github.com/devzhi/imgx/releases/download/${latest_version}
 
 # 下载并安装
 echo "正在下载 imgx ${latest_version} ..."
-curl -sL ${download_url} | tar xzf -C /usr/local/bin
+curl -sL ${download_url} | tar xzf - -C /usr/local/bin
 
 if [ $? -eq 0 ]; then
     echo "imgx ${latest_version} 安装成功"
