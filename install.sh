@@ -29,7 +29,7 @@ fi
 
 # 检查/opt/imgx目录是否存在，不存在则创建
 if [ ! -d /opt/imgx ]; then
-    sudo mkdir -p /opt/imgx
+    mkdir -p /opt/imgx
 fi
 
 # 检查是否安装了 curl
@@ -60,7 +60,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # 创建软连接到/usr/local/bin
-sudo ln -sf /opt/imgx/imgx /usr/local/bin/imgx
+ln -sf /opt/imgx/imgx /usr/local/bin/imgx
 
 if [ $? -eq 0 ]; then
     echo "imgx ${latest_version} 安装成功"
