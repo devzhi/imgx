@@ -14,7 +14,7 @@ tag="v$version"
 sed -i "s/version := \"[^\"]*\"/version := \"$version\"/" ./main.go
 
 # 更新 README.md 中的版本号
-sed -i "s/Version-[0-9]+\.[0-9]+\.[0-9]+/Version-$version/" ./README.md
+sed -i "s/Version-\([0-9]\{1,\}\.\)\{2\}[0-9]\{1,\}/Version-$version/g" ./README.md
 
 # 添加修改后的文件到暂存区
 git add ./main.go
