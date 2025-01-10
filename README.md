@@ -12,7 +12,7 @@
     </b>
   </p>
   <p>
-  <a href="https://github.com/devzhi/MessageRouter/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-APL2.0-blue.svg"></img></a>
+  <a href="https://github.com/devzhi/imgx/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-APL2.0-blue.svg"></img></a>
   <a href="#"><img src="https://img.shields.io/badge/Contributions-welcome-green?logo=github"></img></a>
     <a href="#"><img src="https://img.shields.io/badge/Version-0.0.1-green.svg"></img></a>
   </p>
@@ -75,7 +75,7 @@ imgx -name nginx -tag latest -arch arm64 -os linux
 
 ## 免责声明
 
-本开源项目（imgx）是依据 [Apache License 2.0](https://github.com/devzhi/MessageRouter/blob/main/LICENSE) 许可证授权发布，旨在为开发者社区提供有益的工具、代码或资源，以促进技术创新与共享。
+本开源项目（imgx）是依据 [Apache License 2.0](https://github.com/devzhi/imgx/blob/main/LICENSE) 许可证授权发布，旨在为开发者社区提供有益的工具、代码或资源，以促进技术创新与共享。
 
 使用者应知悉并同意：
 
