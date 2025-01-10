@@ -11,14 +11,14 @@ version=$1
 tag="v$version"
 
 # 更新 main.go 中的版本号
-sed -i "s/version := \"[^\"]*\"/version := \"$version\"/" path/to/main.go
+sed -i "s/version := \"[^\"]*\"/version := \"$version\"/" ./main.go
 
 # 更新 README.md 中的版本号
-sed -i "s/Version-[0-9]+\.[0-9]+\.[0-9]+/Version-$version/" path/to/README.md
+sed -i "s/Version-[0-9]+\.[0-9]+\.[0-9]+/Version-$version/" ./README.md
 
 # 添加修改后的文件到暂存区
-git add path/to/main.go
-git add path/to/README.md
+git add ./main.go
+git add ./README.md
 
 # 提交修改
 git commit -m "Update version to $version"
