@@ -8,10 +8,11 @@ import (
 )
 
 var (
-	imageName = flag.String("name", "", "name of the image")
-	tag       = flag.String("tag", "latest", "tag of the image")
-	arch      = flag.String("arch", "amd64", "architecture of the image")
-	osFlag    = flag.String("os", "linux", "operating system of the image")
+	imageName   = flag.String("name", "", "name of the image")
+	tag         = flag.String("tag", "latest", "tag of the image")
+	arch        = flag.String("arch", "amd64", "architecture of the image")
+	osFlag      = flag.String("os", "linux", "operating system of the image")
+	showVersion = flag.Bool("version", false, "show version")
 )
 
 func init() {
@@ -25,6 +26,12 @@ func init() {
 func main() {
 	// 解析参数
 	flag.Parse()
+
+	if *showVersion {
+		version := "v0.0.4"
+		fmt.Println("imgx version", version)
+		return
+	}
 
 	if *imageName == "" {
 		fmt.Println("Image name is required")
