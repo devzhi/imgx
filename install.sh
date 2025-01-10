@@ -22,7 +22,7 @@ os=$(uname -s)
 arch=$(uname -m)
 
 # 下载地址
-download_url="https://github.com/devzhi/imgx/releases/download/${latest_version}/imgx_${latest_version}_${os}_${arch}.tar.gz"
+download_url="https://github.com/devzhi/imgx/releases/download/${latest_version}/imgx_${latest_version#v}_${os}_${arch}.tar.gz"
 
 # 下载并安装
 echo "正在下载 imgx ${latest_version} ..."
