@@ -6,9 +6,9 @@ if [ ! -w /usr/local/bin ]; then
     exit 1
 fi
 
-# 检查/opt/imgx目录是否可写
-if [ ! -w /opt/imgx ]; then
-    echo "/opt/imgx 目录不可写，请使用 sudo 或 root 用户运行此脚本"
+# 检查/opt目录是否可写
+if [ ! -w /opt ]; then
+    echo "/opt 目录不可写，请使用 sudo 或 root 用户运行此脚本"
     exit 1
 fi
 
