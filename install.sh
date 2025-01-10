@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# 检查/usr/local/bin目录是否可写
+if [ ! -w /usr/local/bin ]; then
+    echo "/usr/local/bin 目录不可写，请使用 sudo 或 root 用户运行此脚本"
+    exit 1
+fi
+
+# 检查是否安装了 curl
+if ! command -v curl &> /dev/null; then
+    echo "请先安装 curl"
+    exit 1
+fi
+
 # 获取最新版本
 latest_version=$(curl -s https://api.github.com/repos/devzhi/imgx/releases/latest | grep tag_name | cut -d '"' -f 4)
 
