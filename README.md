@@ -30,6 +30,20 @@
 
 ## 使用说明
 
+### 安装
+
+#### Linux / macOS
+
+```shell
+curl https://raw.githubusercontent.com/devzhi/imgx/main/install.sh | sudo bash
+```
+
+#### Windows
+
+1. 进入[Release](https://github.com/devzhi/imgx/releases/latest)页面下载最新版本的imgx压缩包
+2. 解压压缩包
+3. 将解压后的imgx可执行文件添加至系统环境变量中
+
 ### 调用方式
 
 ```shell
