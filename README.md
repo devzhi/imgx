@@ -8,7 +8,7 @@
   </p>
   <p>
     <b>
-      专为解决Docker Hub拉取镜像困难而设计的效率工具
+      Docker镜像传输工具
     </b>
   </p>
   <p>
@@ -24,9 +24,8 @@
 
 ## 功能特性
 
-- [ ] 从Docker Hub拉取镜像
-- [x] 在不依赖Docker的情况下从Docker Hub拉取镜像
-- [ ] 自动推送镜像至目标服务器
+- [x] 从Docker Hub拉取镜像（不依赖Docker）
+- [x] 自动推送镜像至目标服务器
 
 ## 使用说明
 
@@ -52,21 +51,31 @@ imgx [options]
 
 ### 选项说明
 
-`-arch string`：用于指定镜像（image）的架构，默认值为 "amd64"。例如，若需指定为其他架构（如 arm64），则添加 `-arch arm64` 选项。
-
-`-name string`：用来设定镜像（image）的名称，根据实际需求填写相应的名称内容即可。
-
-`-os string`：指定镜像（image）的操作系统类型，默认值是 "linux"。若针对其他操作系统的镜像操作，可添加 `-os` 选项。
-
-`-tag string`：确定镜像（image）的标签，默认标签为 "latest"。如需自定义标签（比如 v1.0），可添加 `-tag v1.0` 选项。
+- `arch string`：用于指定镜像（image）的架构，默认值为 "amd64"。例如，若需指定为其他架构（如 arm64），则添加 -arch arm64 选项。
+- `name string`：用来设定镜像（image）的名称，根据实际需求填写相应的名称内容即可。
+- `os string`：指定镜像（image）的操作系统类型，默认值是 "linux"。若针对其他操作系统的镜像操作，可添加 os 选项。
+- `tag string`：确定镜像（image）的标签，默认标签为 "latest"。如需自定义标签（比如 v1.0），可添加 -tag v1.0 选项。
+- `version`：显示当前版本信息。 -protocol string：指定远程主机的协议，默认值为 "tcp"。
+- `host string`：远程主机的地址。 -port int：远程主机的端口，默认值为 22。
+- `username string`：远程主机的用户名。 -password string：远程主机的密码。
 
 ### 示例
 
 ```shell
+# 拉取默认标签（latest）、架构（amd64）和操作系统（linux）的nginx镜像
 imgx -name nginx
+
+# 拉取指定标签（latest）的nginx镜像
 imgx -name nginx -tag latest
+
+# 拉取指定标签（latest）和架构（arm64）的nginx镜像
 imgx -name nginx -tag latest -arch arm64
+
+# 拉取指定标签（latest）、架构（arm64）和操作系统（linux）的nginx镜像
 imgx -name nginx -tag latest -arch arm64 -os linux
+
+# 拉取nginx镜像并上传到指定的远程主机
+imgx -name nginx -host your_host -username your_username -password your_password
 ```
 
 ## Star History
@@ -75,7 +84,8 @@ imgx -name nginx -tag latest -arch arm64 -os linux
 
 ## 免责声明
 
-本开源项目（imgx）是依据 [Apache License 2.0](https://github.com/devzhi/imgx/blob/main/LICENSE) 许可证授权发布，旨在为开发者社区提供有益的工具、代码或资源，以促进技术创新与共享。
+本开源项目（imgx）是依据 [Apache License 2.0](https://github.com/devzhi/imgx/blob/main/LICENSE)
+许可证授权发布，旨在为开发者社区提供有益的工具、代码或资源，以促进技术创新与共享。
 
 使用者应知悉并同意：
 
