@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/devzhi/imgx/internal/load"
 	"github.com/devzhi/imgx/internal/pull"
 	"os"
 )
@@ -13,6 +14,11 @@ var (
 	arch        = flag.String("arch", "amd64", "architecture of the image")
 	osFlag      = flag.String("os", "linux", "operating system of the image")
 	showVersion = flag.Bool("version", false, "show version")
+	protocol    = flag.String("protocol", "tcp", "protocol of the remote host")
+	host        = flag.String("host", "", "host of the remote host")
+	port        = flag.Int("port", 22, "port of the remote host")
+	username    = flag.String("username", "", "username of the remote host")
+	password    = flag.String("password", "", "password of the remote host")
 )
 
 func init() {
@@ -73,4 +79,31 @@ func main() {
 		return
 	}
 	fmt.Println("Image packaged to", *outputFile)
+
+	// 连接远程主机
+	client, err := load.GetSSHClient(*protocol, *host, *port, *username, *password)
+	if err != nil {
+		fmt.Println("Error connecting to remote host", err)
+		return
+	}
+	defer client.Close()
+	// 创建临时目录
+	tempDir, err := load.CreateTempDir(client)
+	if err != nil {
+		fmt.Println("Error creating temp dir", err)
+		return
+	}
+	// 上传文件
+	err = load.UploadFile(client, "./"+*outputFile, tempDir+"/"+*outputFile)
+	if err != nil {
+		fmt.Println("Error uploading file", err)
+		return
+	}
+	// 导入镜像
+	image, err := load.LoadImage(client, tempDir+"/"+*outputFile, *password)
+	if err != nil {
+		fmt.Println("Error loading image", err)
+		return
+	}
+	fmt.Println(image)
 }
