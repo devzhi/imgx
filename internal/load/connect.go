@@ -3,6 +3,7 @@ package load
 import (
 	"golang.org/x/crypto/ssh"
 	"strconv"
+	"strings"
 )
 
 // GetSSHClient 获取SSH客户端
@@ -12,4 +13,20 @@ func GetSSHClient(protocol string, host string, port int, username string, passw
 		Auth:            []ssh.AuthMethod{ssh.Password(password)},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	})
+}
+
+// CreateTempDir 创建临时目录
+func CreateTempDir(client *ssh.Client) (string, error) {
+	session, err := client.NewSession()
+	if err != nil {
+		return "", err
+	}
+	defer session.Close()
+	// 创建临时目录
+	output, err := session.CombinedOutput("mktemp -d")
+	if err != nil {
+		return "", err
+	}
+
+	return strings.ReplaceAll(string(output), "\n", ""), nil
 }
