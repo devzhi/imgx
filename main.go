@@ -80,6 +80,11 @@ func main() {
 	}
 	fmt.Println("Image packaged to", *outputFile)
 
+	// 判断是否有远程主机信息
+	if *host == "" || *username == "" || *password == "" {
+		return
+	}
+
 	// 连接远程主机
 	client, err := load.GetSSHClient(*protocol, *host, *port, *username, *password)
 	if err != nil {
