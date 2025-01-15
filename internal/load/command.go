@@ -10,48 +10,59 @@ import (
 
 // ExecuteCommand 执行命令
 func ExecuteCommand(client *ssh.Client, cmd string, sudoPassword string) (string, error) {
-	// 获取session
 	session, err := client.NewSession()
 	if err != nil {
 		return "", fmt.Errorf("failed to create session: %v", err)
 	}
-	// 创建管道用于处理输入输出
+	defer session.Close()
+
+	// 设置伪终端以处理 sudo 提示
+	modes := ssh.TerminalModes{
+		ssh.ECHO:          0,     // 禁用回显
+		ssh.TTY_OP_ISPEED: 14400, // 输入速度
+		ssh.TTY_OP_OSPEED: 14400, // 输出速度
+	}
+
+	if err := session.RequestPty("xterm", 80, 40, modes); err != nil {
+		return "", fmt.Errorf("request for pseudo terminal failed: %v", err)
+	}
+
+	// 创建输出缓冲区
+	var stdoutBuf, stderrBuf bytes.Buffer
+	session.Stdout = &stdoutBuf
+	session.Stderr = &stderrBuf
+
+	// 获取输入管道
 	stdin, err := session.StdinPipe()
 	if err != nil {
 		return "", fmt.Errorf("failed to create stdin pipe: %v", err)
 	}
 
-	var outputBuffer bytes.Buffer
-	session.Stdout = &outputBuffer
-	session.Stderr = &outputBuffer
-
 	// 启动命令
-	err = session.Start(cmd)
-	if err != nil {
+	if err := session.Start(cmd); err != nil {
 		return "", fmt.Errorf("failed to start command: %v", err)
 	}
 
-	// 监听输出中是否包含密码提示
-	go func() {
-		for {
-			if strings.Contains(outputBuffer.String(), "[sudo] password") {
-				stdin.Write([]byte(sudoPassword + "\n"))
-				break
-			}
-			time.Sleep(100 * time.Millisecond)
-		}
-	}()
+	// 等待片刻以让可能的密码提示出现
+	time.Sleep(100 * time.Millisecond)
+
+	// 如果看到密码提示，输入密码
+	if strings.Contains(stdoutBuf.String(), "[sudo]") || strings.Contains(stderrBuf.String(), "[sudo]") {
+		stdin.Write([]byte(sudoPassword + "\n"))
+	}
 
 	// 等待命令完成
 	err = session.Wait()
 	if err != nil {
-		if strings.Contains(outputBuffer.String(), "Sorry, try again") {
+		// 检查是否是密码错误
+		if strings.Contains(stdoutBuf.String(), "Sorry, try again") ||
+			strings.Contains(stderrBuf.String(), "Sorry, try again") {
 			return "", fmt.Errorf("incorrect sudo password")
 		}
-		return outputBuffer.String(), fmt.Errorf("command failed: %v", err)
+		return stdoutBuf.String() + stderrBuf.String(), fmt.Errorf("command failed: %v", err)
 	}
 
-	return outputBuffer.String(), nil
+	return stdoutBuf.String() + stderrBuf.String(), nil
 }
 
 // LoadImage 载入镜像
