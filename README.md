@@ -18,10 +18,6 @@
   </p>
 </div>
 
-## 项目愿景
-
-在网络状况良好的设备中拉取镜像并自动推送至目标服务器，以解决Docker Hub拉取镜像困难的问题。
-
 ## 功能特性
 
 - [x] 从Docker Hub拉取镜像（不依赖Docker）
@@ -57,7 +53,8 @@ imgx [options]
 - `tag string`：确定镜像（image）的标签，默认标签为 "latest"。如需自定义标签（比如 v1.0），可添加 -tag v1.0 选项。
 - `version`：显示当前版本信息。 -protocol string：指定远程主机的协议，默认值为 "tcp"。
 - `host string`：远程主机的地址。 -port int：远程主机的端口，默认值为 22。
-- `username string`：远程主机的用户名。 -password string：远程主机的密码。
+- `username string`：远程主机的用户名。 
+- `password string`：远程主机的密码。
 
 ### 示例
 
