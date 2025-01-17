@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"github.com/spf13/cobra"
 )
@@ -26,5 +27,7 @@ func init() {
 }
 
 func Execute() {
+	ctx := context.Background()
+	rootCmd.SetContext(ctx)
 	rootCmd.Execute()
 }
