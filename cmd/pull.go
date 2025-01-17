@@ -8,7 +8,7 @@ import (
 
 var pullCommand = &cobra.Command{
 	Use:   "pull [image]",
-	Short: "pull image",
+	Short: "Pulling images from Docker hub locally",
 	Run: func(cmd *cobra.Command, args []string) {
 		// 获取flag参数
 		tag, _ := cmd.Flags().GetString("tag")

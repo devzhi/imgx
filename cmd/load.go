@@ -8,7 +8,7 @@ import (
 
 var loadCommand = &cobra.Command{
 	Use:   "load [input]",
-	Short: "load i",
+	Short: "Load the image to the remote host",
 	Run: func(cmd *cobra.Command, args []string) {
 		// 获取输入文件
 		if len(args) == 0 {
