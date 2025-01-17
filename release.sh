@@ -11,7 +11,7 @@ version=$1
 tag="v$version"
 
 # 更新 main.go 中的版本号
-sed -i "s/version := \"[^\"]*\"/version := \"$version\"/" ./main.go
+sed -i "s/version := \"[^\"]*\"/version := \"$version\"/" ./cmd/version.go
 
 # 更新 README.md 中的版本号
 sed -i "s/Version-\([0-9]\{1,\}\.\)\{2\}[0-9]\{1,\}/Version-$version/g" ./README.md
