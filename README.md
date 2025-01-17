@@ -50,10 +50,15 @@ imgx [command]
 ### 可用命令
 
 `completion`：生成指定shell的自动补全脚本
+
 `help`：关于任何命令的帮助
+
 `load`：将镜像加载到远程主机
+
 `pull`：从Docker hub本地拉取镜像
+
 `version`：显示imgx版本信息
+
 `x`：拉取并加载镜像到远程主机
 
 ### Flags 标志
