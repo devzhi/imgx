@@ -66,6 +66,13 @@ func ExecuteCommand(client *ssh.Client, cmd string, sudoPassword string) (string
 }
 
 // LoadImage 载入镜像
-func LoadImage(client *ssh.Client, filePath string, password string) (string, error) {
-	return ExecuteCommand(client, "sudo docker load -i "+filePath, password)
+func LoadImage(client *ssh.Client, filePath string, password string) (string, bool, error) {
+	output, err := ExecuteCommand(client, "sudo docker load -i "+filePath, password)
+	if err != nil {
+		return output, false, err
+	} else if strings.Contains(output, "Loaded image") {
+		return output, true, nil
+	} else {
+		return output, false, nil
+	}
 }
