@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"github.com/devzhi/imgx/internal/pull"
 	"github.com/spf13/cobra"
@@ -47,6 +48,9 @@ var pullCommand = &cobra.Command{
 			return
 		}
 		fmt.Println("\nImage packaged to", *outputFile)
+		// 打包后的镜像写入context
+		ctx := context.WithValue(cmd.Context(), "outputFile", *outputFile)
+		cmd.SetContext(ctx)
 	},
 }
 
