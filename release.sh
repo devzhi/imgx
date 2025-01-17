@@ -17,7 +17,7 @@ sed -i "s/version := \"[^\"]*\"/version := \"$version\"/" ./cmd/version.go
 sed -i "s/Version-\([0-9]\{1,\}\.\)\{2\}[0-9]\{1,\}/Version-$version/g" ./README.md
 
 # 添加修改后的文件到暂存区
-git add ./main.go
+git add ./cmd/version.go
 git add ./README.md
 
 # 提交修改
