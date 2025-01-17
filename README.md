@@ -21,7 +21,8 @@
 ## 功能特性
 
 - [x] 从Docker Hub拉取镜像（不依赖Docker）
-- [x] 自动推送镜像至目标服务器
+- [x] 将本地镜像文件推送至远程主机
+- [x] 从Docker Hub拉取镜像并推送至远程主机
 
 ## 使用说明
 
@@ -42,37 +43,75 @@ curl https://raw.githubusercontent.com/devzhi/imgx/main/install.sh | sudo bash
 ### 调用方式
 
 ```shell
-imgx [options]
+imgx [flags]
+imgx [command]
 ```
 
-### 选项说明
+### 可用命令
 
-- `arch string`：用于指定镜像（image）的架构，默认值为 "amd64"。例如，若需指定为其他架构（如 arm64），则添加 -arch arm64 选项。
-- `name string`：用来设定镜像（image）的名称，根据实际需求填写相应的名称内容即可。
-- `os string`：指定镜像（image）的操作系统类型，默认值是 "linux"。若针对其他操作系统的镜像操作，可添加 os 选项。
-- `tag string`：确定镜像（image）的标签，默认标签为 "latest"。如需自定义标签（比如 v1.0），可添加 -tag v1.0 选项。
-- `version`：显示当前版本信息。 -protocol string：指定远程主机的协议，默认值为 "tcp"。
-- `host string`：远程主机的地址。 -port int：远程主机的端口，默认值为 22。
-- `username string`：远程主机的用户名。 
-- `password string`：远程主机的密码。
+`completion`：生成指定shell的自动补全脚本
+`help`：关于任何命令的帮助
+`load`：将镜像加载到远程主机
+`pull`：从Docker hub本地拉取镜像
+`version`：显示imgx版本信息
+`x`：拉取并加载镜像到远程主机
+
+### Flags 标志
+
+`-h, --help`：帮助信息
+`-v, --version`：显示版本信息
 
 ### 示例
 
+#### 从Docker Hub拉取镜像
+
 ```shell
-# 拉取默认标签（latest）、架构（amd64）和操作系统（linux）的nginx镜像
-imgx -name nginx
+imgx pull [image] [flags]
 
-# 拉取指定标签（latest）的nginx镜像
-imgx -name nginx -tag latest
+Flags:
+  -a, --arch string   拉取镜像的架构 (默认 "amd64") [可选]
+  -h, --help          帮助信息 [可选]
+  -o, --os string     拉取镜像的操作系统 (默认 "linux") [可选]
+  -t, --tag string    拉取镜像的标签 (默认 "latest") [可选]
 
-# 拉取指定标签（latest）和架构（arm64）的nginx镜像
-imgx -name nginx -tag latest -arch arm64
+imgx pull ubuntu -a amd64 -o linux -t latest
+```
 
-# 拉取指定标签（latest）、架构（arm64）和操作系统（linux）的nginx镜像
-imgx -name nginx -tag latest -arch arm64 -os linux
+#### 将镜像加载到远程主机
 
-# 拉取nginx镜像并上传到指定的远程主机
-imgx -name nginx -host your_host -username your_username -password your_password
+```shell
+imgx load [input] [flags]
+
+Flags:
+  -h, --help              帮助信息 [可选]
+  -H, --host string       远程主机地址
+  -p, --password string   远程主机的密码
+  -P, --port int          远程主机的端口 (默认 22) [可选]
+      --protocol string   远程主机的SSH协议 (默认 "tcp") [可选]
+  -r, --rm                成功加载后删除镜像文件 [可选]
+  -u, --username string   远程主机的用户名
+
+imgx load ubuntu.tar -H 192.168.1.100 -P 22 -u user -p password --protocol tcp -r
+```
+
+#### 拉取并加载镜像到远程主机
+
+```shell
+imgx x [image] [flags]
+
+Flags:
+  -a, --arch string       拉取镜像的架构 (默认 "amd64") [可选]
+  -h, --help              帮助信息 [可选]
+  -H, --host string       远程主机地址
+  -o, --os string         拉取镜像的操作系统 (默认 "linux") [可选]
+  -p, --password string   远程主机的密码
+  -P, --port int          远程主机的端口 (默认 22) [可选]
+      --protocol string   远程主机的SSH协议 (默认 "tcp") [可选]
+  -r, --rm                成功加载后删除镜像文件 [可选]
+  -t, --tag string        拉取镜像的标签 (默认 "latest") [可选]
+  -u, --username string   远程主机的用户名
+
+imgx x ubuntu -a amd64 -o linux -t latest -H 192.168.1.100 -P 22 -u user -p password --protocol tcp -r
 ```
 
 ## Star History
