@@ -15,39 +15,19 @@ var pullCommand = &cobra.Command{
 		tag, _ := cmd.Flags().GetString("tag")
 		arch, _ := cmd.Flags().GetString("arch")
 		osFlag, _ := cmd.Flags().GetString("os")
+		// 构造pull参数
+		command := &pull.Command{
+			Image:  args[0],
+			Tag:    tag,
+			Arch:   arch,
+			OsFlag: osFlag,
+		}
 		// 执行pull命令
-		// 获取token
-		token, err := pull.GetToken(args[0])
+		outputFile, err := pull.Execute(command)
 		if err != nil {
-			fmt.Println("Error getting token", err)
+			fmt.Println("Error pulling image", err)
 			return
 		}
-
-		// 获取镜像清单
-		manifest, err := pull.GetManifest(token, args[0], tag, arch, osFlag)
-		if err != nil {
-			fmt.Println("Error getting manifest", err)
-			return
-		}
-
-		// 下载镜像
-		path, err := pull.DownloadImage(token, manifest, arch, osFlag, args[0], tag)
-		if err != nil {
-			fmt.Println("Error downloading image", err)
-			return
-		}
-		fmt.Println("Image downloaded to", *path)
-
-		// 删除临时文件
-		defer pull.RemoveImageSaveDir(args[0], tag, arch, osFlag)
-
-		// 打包镜像
-		outputFile, err := pull.Package(*path, args[0], tag, arch, osFlag, nil)
-		if err != nil {
-			fmt.Println("Error packaging image", err)
-			return
-		}
-		fmt.Println("\nImage packaged to", *outputFile)
 		// 打包后的镜像写入context
 		ctx := context.WithValue(cmd.Context(), "outputFile", *outputFile)
 		cmd.SetContext(ctx)
