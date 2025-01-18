@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/devzhi/imgx/internal/load"
+	"github.com/devzhi/imgx/internal/util"
 	"github.com/spf13/cobra"
 )
 
@@ -36,17 +37,15 @@ var loadCommand = &cobra.Command{
 			fmt.Println("Error: username is required")
 			return
 		}
-		password, err := cmd.Flags().GetString("password")
+		password, err := util.ReadPassword()
 		if err != nil {
-			fmt.Println("Error getting password", err)
-			return
+			fmt.Println("Error reading password", err)
 		}
 		if password == "" {
 			fmt.Println("Error: password is required")
 			return
 		}
 		protocol, _ := cmd.Flags().GetString("protocol")
-		remove, _ := cmd.Flags().GetBool("rm")
 		// 构造load参数
 		flag := &load.Flag{
 			InputFile: *inputFile,
@@ -55,7 +54,7 @@ var loadCommand = &cobra.Command{
 			Username:  username,
 			Password:  password,
 			Protocol:  protocol,
-			Remove:    remove,
+			Remove:    false,
 		}
 		// 执行load命令
 		err = load.Execute(flag)
@@ -69,7 +68,6 @@ func init() {
 	loadCommand.Flags().StringP("host", "H", "", "load image host")
 	loadCommand.Flags().IntP("port", "P", 22, "load image host's port")
 	loadCommand.Flags().StringP("username", "u", "", "load image host's username")
-	loadCommand.Flags().StringP("password", "p", "", "load image host's password")
+	loadCommand.Flags().BoolP("password", "p", false, "load image host's password")
 	loadCommand.Flags().String("protocol", "tcp", "load image host's ssh protocol")
-	loadCommand.Flags().BoolP("rm", "r", false, "remove the image file after successful loading")
 }

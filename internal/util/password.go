@@ -2,6 +2,7 @@ package util
 
 import (
 	"bufio"
+	"fmt"
 	"golang.org/x/term"
 	"os"
 	"strings"
@@ -9,6 +10,7 @@ import (
 
 // ReadPassword 读取密码，支持隐藏输入
 func ReadPassword() (string, error) {
+	fmt.Print("Enter Password: ")
 	// 首先尝试使用 term.ReadPassword
 	if password, err := term.ReadPassword(int(os.Stdin.Fd())); err == nil {
 		return string(password), nil
