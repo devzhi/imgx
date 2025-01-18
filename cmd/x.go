@@ -95,5 +95,5 @@ func init() {
 	xCommand.Flags().StringP("username", "u", "", "load image host's username")
 	xCommand.Flags().StringP("password", "p", "", "load image host's password")
 	xCommand.Flags().String("protocol", "tcp", "load image host's ssh protocol")
-	xCommand.Flags().BoolP("rm", "r", false, "remove the image file after successful loading")
+	xCommand.Flags().BoolP("rm", "r", true, "remove the image file after successful loading")
 }
