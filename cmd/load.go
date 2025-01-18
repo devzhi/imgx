@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/devzhi/imgx/internal/load"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var loadCommand = &cobra.Command{
@@ -48,43 +47,18 @@ var loadCommand = &cobra.Command{
 		}
 		protocol, _ := cmd.Flags().GetString("protocol")
 		remove, _ := cmd.Flags().GetBool("rm")
-		// 连接远程主机
-		client, err := load.GetSSHClient(protocol, host, port, username, password)
-		if err != nil {
-			fmt.Println("Error connecting to remote host", err)
-			return
+		// 构造load参数
+		flag := &load.Flag{
+			InputFile: *inputFile,
+			Host:      host,
+			Port:      port,
+			Username:  username,
+			Password:  password,
+			Protocol:  protocol,
+			Remove:    remove,
 		}
-		defer client.Close()
-		// 创建临时目录
-		tempDir, err := load.CreateTempDir(client)
-		if err != nil {
-			fmt.Println("Error creating temp dir", err)
-			return
-		}
-		// 上传文件
-		err = load.UploadFile(client, "./"+*inputFile, tempDir+"/"+*inputFile)
-		if err != nil {
-			fmt.Println("Error uploading file", err)
-			return
-		}
-		// 导入镜像
-		image, success, err := load.LoadImage(client, tempDir+"/"+*inputFile, password)
-		if err != nil {
-			fmt.Println("Error loading image", err)
-			return
-		} else if success {
-			fmt.Println("Image loaded", image)
-			if remove {
-				err := os.Remove(*inputFile)
-				if err != nil {
-					fmt.Println("Error removing image file", err)
-				} else {
-					fmt.Println("Image file removed")
-				}
-			}
-		} else {
-			fmt.Println("Error loading image", image)
-		}
+		// 执行load命令
+		err = load.Execute(flag)
 	},
 }
 
