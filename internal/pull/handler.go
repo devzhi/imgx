@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-// Command pull命令参数
-type Command struct {
+// Flag pull命令参数
+type Flag struct {
 	Image  string
 	Tag    string
 	Arch   string
@@ -13,7 +13,7 @@ type Command struct {
 }
 
 // Execute 执行pull命令
-func Execute(command *Command) (*string, error) {
+func Execute(command *Flag) (*string, error) {
 	// 执行pull命令
 	// 获取token
 	token, err := GetToken(command.Image)

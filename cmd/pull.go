@@ -16,7 +16,7 @@ var pullCommand = &cobra.Command{
 		arch, _ := cmd.Flags().GetString("arch")
 		osFlag, _ := cmd.Flags().GetString("os")
 		// 构造pull参数
-		command := &pull.Command{
+		command := &pull.Flag{
 			Image:  args[0],
 			Tag:    tag,
 			Arch:   arch,
