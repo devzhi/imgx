@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"github.com/devzhi/imgx/internal/pull"
 	"github.com/spf13/cobra"
@@ -23,14 +22,11 @@ var pullCommand = &cobra.Command{
 			OsFlag: osFlag,
 		}
 		// 执行pull命令
-		outputFile, err := pull.Execute(command)
+		_, err := pull.Execute(command)
 		if err != nil {
 			fmt.Println("Error pulling image", err)
 			return
 		}
-		// 打包后的镜像写入context
-		ctx := context.WithValue(cmd.Context(), "outputFile", *outputFile)
-		cmd.SetContext(ctx)
 	},
 }
 
