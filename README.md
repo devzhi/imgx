@@ -95,7 +95,7 @@ Flags:
       --protocol string   远程主机的SSH协议 (默认 "tcp") [可选]
   -u, --username string   远程主机的用户名
 
-imgx load nginx_latest_amd64_linux.tar.gz -H 192.168.1.100 -P 22 -u user -p password --protocol tcp -r
+imgx load nginx_latest_amd64_linux.tar.gz -H 192.168.1.100 -P 22 -u user -p --protocol tcp -r
 ```
 
 #### 拉取并加载镜像到远程主机
@@ -115,7 +115,7 @@ Flags:
   -t, --tag string        拉取镜像的标签 (默认 "latest") [可选]
   -u, --username string   远程主机的用户名
 
-imgx x nginx -a amd64 -o linux -t latest -H 192.168.1.100 -P 22 -u user -p password --protocol tcp -r
+imgx x nginx -a amd64 -o linux -t latest -H 192.168.1.100 -P 22 -u user -p --protocol tcp -r
 ```
 
 ## 演示
