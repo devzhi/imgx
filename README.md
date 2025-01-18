@@ -118,6 +118,10 @@ Flags:
 imgx x nginx -a amd64 -o linux -t latest -H 192.168.1.100 -P 22 -u user -p password --protocol tcp -r
 ```
 
+## 演示
+
+[![asciicast](https://asciinema.org/a/0qmsW2uROmLSeUMbJ4xyMqAEu.svg)](https://asciinema.org/a/0qmsW2uROmLSeUMbJ4xyMqAEu)
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=devzhi/imgx&type=Date)](https://star-history.com/#devzhi/imgx&Date)
