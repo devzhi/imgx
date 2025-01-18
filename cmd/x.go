@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/devzhi/imgx/internal/load"
+	"github.com/devzhi/imgx/internal/pull"
 	"github.com/spf13/cobra"
 )
 
@@ -52,21 +54,32 @@ var xCommand = &cobra.Command{
 			return
 		}
 		protocol, _ := cmd.Flags().GetString("protocol")
+		remove, _ := cmd.Flags().GetBool("rm")
 		// 构造pull参数
-		pullArgs := []string{image, "-t", tag, "-a", arch, "-o", osFlag}
+		pullFlags := &pull.Flag{
+			Image:  image,
+			Tag:    tag,
+			Arch:   arch,
+			OsFlag: osFlag,
+		}
 		// 拉取镜像
-		pullCommand.Run(cmd, pullArgs)
-		// 获取拉取的镜像
-		// 获取拉取的镜像
-		ctx := cmd.Context()
-		outputFile, ok := ctx.Value("outputFile").(string)
-		if !ok || outputFile == "" {
-			fmt.Println("Error: outputFile is empty or not found in context")
+		output, err := pull.Execute(pullFlags)
+		if err != nil {
+			fmt.Println("Error pulling image", err)
 			return
 		}
 		// 构造load参数
-		loadArgs := []string{outputFile, "-r", "-H", host, "-P", fmt.Sprintf("%d", port), "-u", username, "-p", password, "--protocol", protocol}
-		loadCommand.Run(cmd, loadArgs)
+		loadFlags := &load.Flag{
+			InputFile: *output,
+			Host:      host,
+			Port:      port,
+			Username:  username,
+			Password:  password,
+			Protocol:  protocol,
+			Remove:    remove,
+		}
+		// 执行load命令
+		load.Execute(loadFlags)
 	},
 }
 
