@@ -8,15 +8,15 @@ import (
 )
 
 var loadCommand = &cobra.Command{
-	Use:   "load [input]",
+	Use:   "load",
 	Short: "Load the image to the remote host",
 	Run: func(cmd *cobra.Command, args []string) {
 		// 获取输入文件
-		if len(args) == 0 {
-			fmt.Println("Error: input file is required")
+		input, err := cmd.Flags().GetString("input")
+		if err != nil {
+			fmt.Println("Error getting input file", err)
 			return
 		}
-		inputFile := &args[0]
 		// 获取flag参数
 		host, err := cmd.Flags().GetString("host")
 		if err != nil {
@@ -48,7 +48,7 @@ var loadCommand = &cobra.Command{
 		protocol, _ := cmd.Flags().GetString("protocol")
 		// 构造load参数
 		flag := &load.Flag{
-			InputFile: *inputFile,
+			InputFile: input,
 			Host:      host,
 			Port:      port,
 			Username:  username,
@@ -65,6 +65,7 @@ func init() {
 	// 添加load命令
 	rootCmd.AddCommand(loadCommand)
 	// 添加load命令的flag
+	loadCommand.Flags().StringP("input", "i", "", "load image input file")
 	loadCommand.Flags().StringP("host", "H", "", "load image host")
 	loadCommand.Flags().IntP("port", "P", 22, "load image host's port")
 	loadCommand.Flags().StringP("username", "u", "", "load image host's username")
