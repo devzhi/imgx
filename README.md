@@ -14,7 +14,7 @@
   <p>
   <a href="https://github.com/devzhi/imgx/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-APL2.0-blue.svg"></img></a>
   <a href="https://github.com/devzhi/imgx/pulls"><img src="https://img.shields.io/badge/Contributions-welcome-green?logo=github"></img></a>
-  <a href="https://github.com/devzhi/imgx/releases/latest"><img src="https://img.shields.io/badge/Version-1.1.1-green.svg"></img></a>
+  <a href="https://github.com/devzhi/imgx/releases/latest"><img src="https://img.shields.io/badge/Version-1.1.2-green.svg"></img></a>
   </p>
 </div>
 
