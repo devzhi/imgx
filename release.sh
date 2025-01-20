@@ -10,7 +10,7 @@ fi
 version=$1
 tag="v$version"
 
-# 更新 main.go 中的版本号
+# 更新 version.go 中的版本号
 sed -i "s/version := \"[^\"]*\"/version := \"$version\"/" ./cmd/version.go
 
 # 更新 README.md 中的版本号
