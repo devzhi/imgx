@@ -14,12 +14,14 @@ var pullCommand = &cobra.Command{
 		tag, _ := cmd.Flags().GetString("tag")
 		arch, _ := cmd.Flags().GetString("arch")
 		osFlag, _ := cmd.Flags().GetString("os")
+		path, _ := cmd.Flags().GetString("path")
 		// 构造pull参数
 		command := &pull.Flag{
 			Image:  args[0],
 			Tag:    tag,
 			Arch:   arch,
 			OsFlag: osFlag,
+			Path:   path,
 		}
 		// 执行pull命令
 		_, err := pull.Execute(command)
@@ -37,4 +39,5 @@ func init() {
 	pullCommand.Flags().StringP("tag", "t", "latest", "pull image tag")
 	pullCommand.Flags().StringP("arch", "a", "amd64", "pull image arch")
 	pullCommand.Flags().StringP("os", "o", "linux", "pull image os")
+	pullCommand.Flags().StringP("path", "p", "./", "pull image path")
 }

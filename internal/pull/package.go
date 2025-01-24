@@ -19,13 +19,14 @@ func Package(path string, imageName string, tag string, arch string, operateSyst
 		outputFile = &defaultOutputFile
 	}
 	// 创建镜像包
-	file, err := os.Create(*outputFile)
+	imagePath := filepath.Join(filepath.Join(filepath.Dir(path), *outputFile))
+	file, err := os.Create(imagePath)
 	if err != nil {
 		fmt.Println("Error while creating tar file", err)
 		return nil, err
 	}
 	defer file.Close()
-	return outputFile, tarImage(path, *outputFile)
+	return outputFile, tarImage(path, imagePath)
 }
 
 // tarImage 将目录打包为tar文件

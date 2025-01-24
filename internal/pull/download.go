@@ -6,13 +6,14 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/schollz/progressbar/v3"
 )
 
 // DownloadImage 根据提供的manifests下载镜像层和配置
-func DownloadImage(token *TokenResponse, manifests *ManifestsResp, arch string, operateSystem string, imageName string, tag string) (path *string, err error) {
+func DownloadImage(token *TokenResponse, manifests *ManifestsResp, arch string, operateSystem string, imageName string, tag string, workPath string) (path *string, err error) {
 	registryUrl := "https://registry.hub.docker.com/v2"
 	if manifests.MediaType != "application/vnd.oci.image.manifest.v1+json" && manifests.MediaType != "application/vnd.docker.distribution.manifest.v2+json" {
 		fmt.Println("Unsupported manifest type", manifests.MediaType)
@@ -20,7 +21,7 @@ func DownloadImage(token *TokenResponse, manifests *ManifestsResp, arch string, 
 	}
 
 	// 创建镜像目录
-	dir := "./" + strings.ReplaceAll(imageName, "/", "_") + "_" + tag + "_" + arch + "_" + operateSystem
+	dir := filepath.Join(workPath, strings.ReplaceAll(imageName, "/", "_")+"_"+tag+"_"+arch+"_"+operateSystem)
 	err = os.Mkdir(dir, 0755)
 	if err != nil {
 		fmt.Println("Error while creating directory", err)

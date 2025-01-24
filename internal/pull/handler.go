@@ -2,6 +2,7 @@ package pull
 
 import (
 	"fmt"
+	"os"
 )
 
 // Flag pull命令参数
@@ -10,6 +11,7 @@ type Flag struct {
 	Tag    string
 	Arch   string
 	OsFlag string
+	Path   string
 }
 
 // Execute 执行pull命令
@@ -30,7 +32,7 @@ func Execute(flag *Flag) (*string, error) {
 	}
 
 	// 下载镜像
-	path, err := DownloadImage(token, manifest, flag.Arch, flag.OsFlag, flag.Image, flag.Tag)
+	path, err := DownloadImage(token, manifest, flag.Arch, flag.OsFlag, flag.Image, flag.Tag, flag.Path)
 	if err != nil {
 		fmt.Println("Error downloading image", err)
 		return nil, err
@@ -38,7 +40,7 @@ func Execute(flag *Flag) (*string, error) {
 	fmt.Println("Image downloaded to", *path)
 
 	// 删除临时文件
-	defer RemoveImageSaveDir(flag.Image, flag.Tag, flag.Arch, flag.OsFlag)
+	defer os.RemoveAll(*path)
 
 	// 打包镜像
 	outputFile, err := Package(*path, flag.Image, flag.Tag, flag.Arch, flag.OsFlag, nil)
