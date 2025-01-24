@@ -50,6 +50,16 @@ arch=$(uname -m)
 # 下载地址
 download_url="https://github.com/devzhi/imgx/releases/download/${latest_version}/imgx_${latest_version#v}_${os}_${arch}.tar.gz"
 
+# 检查/opt/imgx目录是否存在，存在则询问是否覆盖
+if [ -d /opt/imgx ]; then
+    read -p "/opt/imgx 目录已存在，是否覆盖？(Y/y|N/n): " overwrite < /dev/tty
+
+    if [[ "$overwrite" != [Yy] ]]; then
+        echo "安装终止: /opt/imgx 目录已存在"
+        exit 1
+    fi
+fi
+
 # 下载并安装到/opt/imgx
 echo "正在下载 imgx ${latest_version} ..."
 curl -sL ${download_url} | tar xzf - -C /opt/imgx/

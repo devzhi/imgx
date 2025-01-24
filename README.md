@@ -79,23 +79,25 @@ Flags:
   -o, --os string     拉取镜像的操作系统 (默认 "linux") [可选]
   -t, --tag string    拉取镜像的标签 (默认 "latest") [可选]
   -p, --path string   镜像保存路径（默认 "./"）[可选]
-imgx pull nginx -a amd64 -o linux -t latest -p /home/myuser
+
+imgx pull nginx -a amd64 -o linux -t latest
 ```
 
 #### 将镜像加载到远程主机
 
 ```shell
-imgx load [input] [flags]
+imgx load [flags]
 
 Flags:
   -h, --help              帮助信息 [可选]
+  -i, --input             镜像文件路径
   -H, --host string       远程主机地址
   -p, --password bool     使用密码登录远程主机（默认 false）[可选]
   -P, --port int          远程主机的端口 (默认 22) [可选]
       --protocol string   远程主机的SSH协议 (默认 "tcp") [可选]
   -u, --username string   远程主机的用户名
 
-imgx load nginx_latest_amd64_linux.tar.gz -H 192.168.1.100 -P 22 -u user -p --protocol tcp -r
+imgx load -i ./nginx_latest_amd64_linux.tar.gz -H 192.168.1.100 -P 22 -u user -p --protocol tcp -r
 ```
 
 #### 拉取并加载镜像到远程主机
