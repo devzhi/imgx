@@ -57,6 +57,7 @@ var xCommand = &cobra.Command{
 			Tag:    tag,
 			Arch:   arch,
 			OsFlag: osFlag,
+			Path:   "./",
 		}
 		// 拉取镜像
 		output, err := pull.Execute(pullFlags)
