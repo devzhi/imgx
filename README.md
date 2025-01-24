@@ -78,8 +78,8 @@ Flags:
   -h, --help          帮助信息 [可选]
   -o, --os string     拉取镜像的操作系统 (默认 "linux") [可选]
   -t, --tag string    拉取镜像的标签 (默认 "latest") [可选]
-
-imgx pull nginx -a amd64 -o linux -t latest
+  -p, --path string   镜像保存路径（默认 "./"）[可选]
+imgx pull nginx -a amd64 -o linux -t latest -p /home/myuser
 ```
 
 #### 将镜像加载到远程主机
