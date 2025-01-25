@@ -27,6 +27,7 @@ func CreateTempDir(client *ssh.Client) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	splitOutput := strings.Split(strings.Trim(string(output), "\n"), "\n")
 
-	return strings.ReplaceAll(string(output), "\n", ""), nil
+	return splitOutput[len(splitOutput)-1], nil
 }
