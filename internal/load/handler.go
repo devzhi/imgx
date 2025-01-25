@@ -41,12 +41,13 @@ func Execute(flag *Flag) error {
 		return err
 	}
 	// 导入镜像
-	image, success, err := LoadImage(client, remotePath, flag.Password, flag.DockerPath)
+	output, success, err := LoadImage(client, remotePath, flag.Password, flag.DockerPath)
 	if err != nil {
 		fmt.Println("Error loading image", err)
+		fmt.Println("Output:\n", output)
 		return err
 	} else if success {
-		fmt.Println("Image loaded", image)
+		fmt.Println("Image loaded", output)
 		if flag.Remove {
 			err := os.Remove(flag.InputFile)
 			if err != nil {
@@ -56,7 +57,7 @@ func Execute(flag *Flag) error {
 			}
 		}
 	} else {
-		fmt.Println("Error loading image", image)
+		fmt.Println("Error loading image", output)
 	}
 	return nil
 }
