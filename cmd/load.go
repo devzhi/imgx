@@ -46,15 +46,17 @@ var loadCommand = &cobra.Command{
 			return
 		}
 		protocol, _ := cmd.Flags().GetString("protocol")
+		dockerPath, _ := cmd.Flags().GetString("docker-path")
 		// 构造load参数
 		flag := &load.Flag{
-			InputFile: input,
-			Host:      host,
-			Port:      port,
-			Username:  username,
-			Password:  password,
-			Protocol:  protocol,
-			Remove:    false,
+			InputFile:  input,
+			Host:       host,
+			Port:       port,
+			Username:   username,
+			Password:   password,
+			Protocol:   protocol,
+			Remove:     false,
+			DockerPath: dockerPath,
 		}
 		// 执行load命令
 		err = load.Execute(flag)
@@ -71,4 +73,5 @@ func init() {
 	loadCommand.Flags().StringP("username", "u", "", "load image host's username")
 	loadCommand.Flags().BoolP("password", "p", false, "load image host's password")
 	loadCommand.Flags().String("protocol", "tcp", "load image host's ssh protocol")
+	loadCommand.Flags().String("docker-path", "docker", "remote host's docker path")
 }

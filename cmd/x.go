@@ -50,6 +50,7 @@ var xCommand = &cobra.Command{
 			fmt.Println("Error reading password", err)
 		}
 		protocol, _ := cmd.Flags().GetString("protocol")
+		dockerPath, _ := cmd.Flags().GetString("docker-path")
 		save, _ := cmd.Flags().GetBool("save")
 		// 构造pull参数
 		pullFlags := &pull.Flag{
@@ -67,13 +68,14 @@ var xCommand = &cobra.Command{
 		}
 		// 构造load参数
 		loadFlags := &load.Flag{
-			InputFile: *output,
-			Host:      host,
-			Port:      port,
-			Username:  username,
-			Password:  password,
-			Protocol:  protocol,
-			Remove:    !save,
+			InputFile:  *output,
+			Host:       host,
+			Port:       port,
+			Username:   username,
+			Password:   password,
+			Protocol:   protocol,
+			Remove:     !save,
+			DockerPath: dockerPath,
 		}
 		// 执行load命令
 		load.Execute(loadFlags)
@@ -93,4 +95,5 @@ func init() {
 	xCommand.Flags().BoolP("password", "p", false, "load image host's password")
 	xCommand.Flags().String("protocol", "tcp", "load image host's ssh protocol")
 	xCommand.Flags().BoolP("save", "s", false, "save image to disk")
+	xCommand.Flags().String("docker-path", "docker", "remote host's docker path")
 }

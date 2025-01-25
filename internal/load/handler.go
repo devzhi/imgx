@@ -8,13 +8,14 @@ import (
 )
 
 type Flag struct {
-	InputFile string
-	Host      string
-	Port      int
-	Username  string
-	Password  string
-	Protocol  string
-	Remove    bool
+	InputFile  string
+	Host       string
+	Port       int
+	Username   string
+	Password   string
+	Protocol   string
+	Remove     bool
+	DockerPath string
 }
 
 // Execute 执行load命令
@@ -40,7 +41,7 @@ func Execute(flag *Flag) error {
 		return err
 	}
 	// 导入镜像
-	image, success, err := LoadImage(client, remotePath, flag.Password)
+	image, success, err := LoadImage(client, remotePath, flag.Password, flag.DockerPath)
 	if err != nil {
 		fmt.Println("Error loading image", err)
 		return err
