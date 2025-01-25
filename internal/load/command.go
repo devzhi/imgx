@@ -47,7 +47,10 @@ func ExecuteCommand(client *ssh.Client, cmd string, sudoPassword string) (string
 	time.Sleep(100 * time.Millisecond)
 
 	// 如果看到密码提示，输入密码
-	if strings.Contains(stdoutBuf.String(), "[sudo]") || strings.Contains(stderrBuf.String(), "[sudo]") {
+	if strings.Contains(stdoutBuf.String(), "[sudo]") ||
+		strings.Contains(stderrBuf.String(), "[sudo]") ||
+		strings.Contains(stdoutBuf.String(), "Password:") ||
+		strings.Contains(stderrBuf.String(), "Password:") {
 		stdin.Write([]byte(sudoPassword + "\n"))
 	}
 
@@ -66,8 +69,8 @@ func ExecuteCommand(client *ssh.Client, cmd string, sudoPassword string) (string
 }
 
 // LoadImage 载入镜像
-func LoadImage(client *ssh.Client, filePath string, password string) (string, bool, error) {
-	output, err := ExecuteCommand(client, "sudo docker load -i "+filePath, password)
+func LoadImage(client *ssh.Client, filePath string, password string, dockerPath string) (string, bool, error) {
+	output, err := ExecuteCommand(client, "sudo "+dockerPath+" load -i "+filePath, password)
 	if err != nil {
 		return output, false, err
 	} else if strings.Contains(output, "Loaded image") {
@@ -75,4 +78,36 @@ func LoadImage(client *ssh.Client, filePath string, password string) (string, bo
 	} else {
 		return output, false, nil
 	}
+}
+
+// GetDockerPath 获取Docker路径
+func GetDockerPath(client *ssh.Client, sudoPassword string) (string, error) {
+	// Potential Docker paths to check
+	dockerPaths := []string{
+		"/usr/local/bin/docker",
+		"/usr/bin/docker",
+		"/bin/docker",
+	}
+
+	// Check which command first
+	whichCmd := "which docker"
+	whichOutput, whichErr := ExecuteCommand(client, whichCmd, sudoPassword)
+
+	if whichErr == nil {
+		dockerPath := strings.TrimSpace(whichOutput)
+		if dockerPath != "" {
+			return dockerPath, nil
+		}
+	}
+
+	// Manual path checking
+	for _, path := range dockerPaths {
+		checkCmd := fmt.Sprintf("test -f %s && echo %s", path, path)
+		output, err := ExecuteCommand(client, checkCmd, sudoPassword)
+		if err == nil && strings.TrimSpace(output) == path {
+			return path, nil
+		}
+	}
+
+	return "", fmt.Errorf("docker executable not found on remote host")
 }
