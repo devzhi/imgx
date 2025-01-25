@@ -38,7 +38,11 @@ func Execute(flag *Flag) error {
 	err = UploadFile(client, flag.InputFile, remotePath)
 	if err != nil {
 		fmt.Println("Error uploading file", err)
-		return err
+		fmt.Println("Try using scp to upload image")
+		err = UploadBySCP(client, flag.InputFile, remotePath)
+		if err != nil {
+			fmt.Println("Error uploading file", err)
+		}
 	}
 	// 导入镜像
 	output, success, err := LoadImage(client, remotePath, flag.Password, flag.DockerPath)

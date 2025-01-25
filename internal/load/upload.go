@@ -36,9 +36,7 @@ func UploadFile(client *ssh.Client, localPath string, remotePath string) error {
 	// 创建远程文件
 	remoteFile, err := sftpClient.Create(remotePath)
 	if err != nil {
-		fmt.Println("Error:", err)
-		fmt.Println("Try using scp to upload file")
-		return UploadBySCP(client, localPath, remotePath)
+		return err
 	}
 	defer remoteFile.Close()
 
