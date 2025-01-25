@@ -3,6 +3,8 @@ package load
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 type Flag struct {
@@ -31,13 +33,14 @@ func Execute(flag *Flag) error {
 		return err
 	}
 	// 上传文件
-	err = UploadFile(client, "./"+flag.InputFile, tempDir+"/"+flag.InputFile)
+	remotePath := strings.ReplaceAll(filepath.Join(tempDir, flag.InputFile), "\\", "/")
+	err = UploadFile(client, flag.InputFile, remotePath)
 	if err != nil {
 		fmt.Println("Error uploading file", err)
 		return err
 	}
 	// 导入镜像
-	image, success, err := LoadImage(client, tempDir+"/"+flag.InputFile, flag.Password)
+	image, success, err := LoadImage(client, remotePath, flag.Password)
 	if err != nil {
 		fmt.Println("Error loading image", err)
 		return err
