@@ -1,6 +1,9 @@
 package load
 
 import (
+	"context"
+	"fmt"
+	"github.com/bramvdbogaerde/go-scp"
 	"github.com/pkg/sftp"
 	"github.com/schollz/progressbar/v3"
 	"golang.org/x/crypto/ssh"
@@ -33,7 +36,9 @@ func UploadFile(client *ssh.Client, localPath string, remotePath string) error {
 	// 创建远程文件
 	remoteFile, err := sftpClient.Create(remotePath)
 	if err != nil {
-		return err
+		fmt.Println("Error:", err)
+		fmt.Println("Try using scp to upload file")
+		return UploadBySCP(client, localPath, remotePath)
 	}
 	defer remoteFile.Close()
 
@@ -49,4 +54,27 @@ func UploadFile(client *ssh.Client, localPath string, remotePath string) error {
 	// 上传文件
 	_, err = remoteFile.ReadFrom(&progressReader)
 	return err
+}
+
+func UploadBySCP(client *ssh.Client, localPath string, remotePath string) error {
+	// 创建scp客户端
+	scpClient, err := scp.NewClientBySSH(client)
+	if err != nil {
+		return err
+	}
+	defer scpClient.Close()
+	// 打开本地文件
+	localFile, err := os.Open(localPath)
+	if err != nil {
+		return err
+	}
+	defer localFile.Close()
+	// 上传文件
+	fmt.Printf("Uploading %s to %s\n", localPath, remotePath)
+	err = scpClient.CopyFromFile(context.Background(), *localFile, remotePath, "0655")
+	if err != nil {
+		return err
+	}
+	fmt.Printf("\nSuccessfully uploaded %s to %s\n", localPath, remotePath)
+	return nil
 }
