@@ -96,6 +96,7 @@ Flags:
   -P, --port int          远程主机的端口 (默认 22) [可选]
       --protocol string   远程主机的SSH协议 (默认 "tcp") [可选]
   -u, --username string   远程主机的用户名
+      --docker-path       Docker路径
 
 imgx load -i ./nginx_latest_amd64_linux.tar.gz -H 192.168.1.100 -P 22 -u user -p --protocol tcp -r
 ```
@@ -116,6 +117,7 @@ Flags:
   -s, --save              成功加载后保留镜像文件（默认 "false"） [可选]
   -t, --tag string        拉取镜像的标签 (默认 "latest") [可选]
   -u, --username string   远程主机的用户名
+      --docker-path       Docker路径
 
 imgx x nginx -a amd64 -o linux -t latest -H 192.168.1.100 -P 22 -u user -p --protocol tcp -r
 ```
