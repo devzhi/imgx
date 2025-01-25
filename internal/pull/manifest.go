@@ -103,8 +103,13 @@ func GetManifest(token *TokenResponse, imageName, tag string, arch string, os st
 
 func GetManifestByDigest(token *TokenResponse, imageName, digest string) (*ManifestsResp, error) {
 	// 构建请求
-	registryUrl := "https://registry.hub.docker.com/v2"
-	req, err := http.NewRequest("GET", registryUrl+"/library/"+imageName+"/manifests/"+digest, nil)
+	registryUrl := "https://registry.hub.docker.com/v2/"
+	if util.IsOfficialImage(imageName) {
+		registryUrl = registryUrl + "library/" + imageName + "/manifests/" + digest
+	} else {
+		registryUrl = registryUrl + imageName + "/manifests/" + digest
+	}
+	req, err := http.NewRequest("GET", registryUrl, nil)
 	if err != nil {
 		fmt.Print("Error while creating manifest request", err)
 		return nil, err
