@@ -9,7 +9,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Show imgx version info.",
 	Run: func(cmd *cobra.Command, args []string) {
-		version := "1.2.3"
+		version := "1.3.0"
 		fmt.Println("imgx version", version)
 	},
 }
