@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/schollz/progressbar/v3"
 )
@@ -29,14 +30,22 @@ func DownloadImage(token *TokenResponse, manifests *ManifestsResp, arch string, 
 	}
 
 	var layers []Layer
+	var wg sync.WaitGroup
 	for _, layer := range manifests.Layers {
+		wg.Add(1)
 		// 下载每一层
-		err := downloadLayer(token, registryUrl, imageName, layer, dir)
-		if err != nil {
-			return nil, err
-		}
-		layers = append(layers, layer)
+		go func() {
+			defer wg.Done()
+			err := downloadLayer(token, registryUrl, imageName, layer, dir)
+			if err != nil {
+				fmt.Println("Error while downloading layer", err)
+				// 退出
+				os.Exit(1)
+			}
+			layers = append(layers, layer)
+		}()
 	}
+	wg.Wait()
 
 	// 下载配置文件
 	err = downloadConfig(token, registryUrl, manifests.Config, dir, imageName)
