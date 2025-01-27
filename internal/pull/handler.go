@@ -32,7 +32,7 @@ func Execute(flag *Flag) (*string, error) {
 	}
 
 	// 下载镜像
-	path, err := DownloadImage(token, manifest, flag.Arch, flag.OsFlag, flag.Image, flag.Tag, flag.Path)
+	path, err := DownloadImage(token, manifest, flag.Arch, flag.OsFlag, flag.Image, flag.Tag)
 	if err != nil {
 		fmt.Println("Error downloading image", err)
 		return nil, err
@@ -43,7 +43,7 @@ func Execute(flag *Flag) (*string, error) {
 	defer os.RemoveAll(*path)
 
 	// 打包镜像
-	outputFile, err := Package(*path, flag.Image, flag.Tag, flag.Arch, flag.OsFlag, nil)
+	outputFile, err := Package(*path, flag.Image, flag.Tag, flag.Arch, flag.OsFlag, flag.Path, nil)
 	if err != nil {
 		fmt.Println("Error packaging image", err)
 		return nil, err

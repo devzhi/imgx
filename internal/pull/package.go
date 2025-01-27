@@ -12,14 +12,14 @@ import (
 )
 
 // Package 打包为可load镜像
-func Package(path string, imageName string, tag string, arch string, operateSystem string, outputFile *string) (*string, error) {
+func Package(path string, imageName string, tag string, arch string, operateSystem string, outputPath string, outputFile *string) (*string, error) {
 	// 确定打包文件名
 	if outputFile == nil {
 		defaultOutputFile := strings.ReplaceAll(imageName, "/", "_") + "_" + tag + "_" + arch + "_" + operateSystem + ".tar.gz"
 		outputFile = &defaultOutputFile
 	}
 	// 创建镜像包
-	imagePath := filepath.Join(filepath.Join(filepath.Dir(path), *outputFile))
+	imagePath := filepath.Join(filepath.Join(filepath.Dir(outputPath), *outputFile))
 	file, err := os.Create(imagePath)
 	if err != nil {
 		fmt.Println("Error while creating tar file", err)
