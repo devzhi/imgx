@@ -35,8 +35,8 @@ func DownloadImage(token *TokenResponse, manifests *ManifestsResp, arch string, 
 
 	var layers []Layer
 	var wg sync.WaitGroup
+	wg.Add(len(manifests.Layers))
 	for _, layer := range manifests.Layers {
-		wg.Add(1)
 		// 下载每一层
 		go func() {
 			defer wg.Done()
