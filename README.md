@@ -17,11 +17,6 @@
   <a href="https://github.com/devzhi/imgx/releases/latest"><img src="https://img.shields.io/badge/Version-1.3.1-green.svg"></img></a>
   </p>
 </div>
-
-## 特别提醒
-
-因近期工作繁忙，且发现了[一个很好用的镜像加速服务](https://docker.xuanyuan.me/)，暂时停止更新本项目，后续有需要会继续更新。
-
 ## 功能特性
 
 - [x] 从Docker Hub拉取镜像（不依赖Docker）
