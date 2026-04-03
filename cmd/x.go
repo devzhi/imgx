@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+
 	"github.com/devzhi/imgx/internal/load"
 	"github.com/devzhi/imgx/internal/pull"
 	"github.com/devzhi/imgx/internal/util"
@@ -11,62 +13,72 @@ import (
 var xCommand = &cobra.Command{
 	Use:   "x [image]",
 	Short: "Pulling and loading images to remote host",
-	Run: func(cmd *cobra.Command, args []string) {
-		image := args[0]
-		if image == "" {
-			fmt.Println("Error: image is required")
-			return
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		tag, err := cmd.Flags().GetString("tag")
+		if err != nil {
+			return err
 		}
-		tag, _ := cmd.Flags().GetString("tag")
-		arch, _ := cmd.Flags().GetString("arch")
-		osFlag, _ := cmd.Flags().GetString("os")
-		// 获取输入文件
-		if len(args) == 0 {
-			fmt.Println("Error: input file is required")
-			return
+		arch, err := cmd.Flags().GetString("arch")
+		if err != nil {
+			return err
 		}
-		// 获取flag参数
+		osFlag, err := cmd.Flags().GetString("os")
+		if err != nil {
+			return err
+		}
 		host, err := cmd.Flags().GetString("host")
 		if err != nil {
-			fmt.Println("Error getting host", err)
-			return
+			return err
 		}
 		if host == "" {
-			fmt.Println("Error: host is required")
-			return
+			return errors.New("host is required")
 		}
-		port, _ := cmd.Flags().GetInt("port")
+		port, err := cmd.Flags().GetInt("port")
+		if err != nil {
+			return err
+		}
 		username, err := cmd.Flags().GetString("username")
 		if err != nil {
-			fmt.Println("Error getting username", err)
-			return
+			return err
 		}
 		if username == "" {
-			fmt.Println("Error: username is required")
-			return
+			return errors.New("username is required")
 		}
+
 		password, err := util.ReadPassword()
 		if err != nil {
-			fmt.Println("Error reading password", err)
+			return fmt.Errorf("read password: %w", err)
 		}
-		protocol, _ := cmd.Flags().GetString("protocol")
-		dockerPath, _ := cmd.Flags().GetString("docker-path")
-		save, _ := cmd.Flags().GetBool("save")
-		// 构造pull参数
+		if password == "" {
+			return errors.New("password is required")
+		}
+
+		protocol, err := cmd.Flags().GetString("protocol")
+		if err != nil {
+			return err
+		}
+		dockerPath, err := cmd.Flags().GetString("docker-path")
+		if err != nil {
+			return err
+		}
+		save, err := cmd.Flags().GetBool("save")
+		if err != nil {
+			return err
+		}
+
 		pullFlags := &pull.Flag{
-			Image:  image,
+			Image:  args[0],
 			Tag:    tag,
 			Arch:   arch,
 			OsFlag: osFlag,
-			Path:   "./",
+			Path:   ".",
 		}
-		// 拉取镜像
 		output, err := pull.Execute(pullFlags)
 		if err != nil {
-			fmt.Println("Error pulling image", err)
-			return
+			return fmt.Errorf("pull image: %w", err)
 		}
-		// 构造load参数
+
 		loadFlags := &load.Flag{
 			InputFile:  *output,
 			Host:       host,
@@ -77,15 +89,15 @@ var xCommand = &cobra.Command{
 			Remove:     !save,
 			DockerPath: dockerPath,
 		}
-		// 执行load命令
-		load.Execute(loadFlags)
+		if err := load.Execute(loadFlags); err != nil {
+			return fmt.Errorf("load image: %w", err)
+		}
+		return nil
 	},
 }
 
 func init() {
-	// 添加x命令
 	rootCmd.AddCommand(xCommand)
-	// 添加flag
 	xCommand.Flags().StringP("tag", "t", "latest", "pull image tag")
 	xCommand.Flags().StringP("arch", "a", "amd64", "pull image arch")
 	xCommand.Flags().StringP("os", "o", "linux", "pull image os")

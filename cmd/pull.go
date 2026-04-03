@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/devzhi/imgx/internal/pull"
 	"github.com/spf13/cobra"
 )
@@ -9,13 +10,25 @@ import (
 var pullCommand = &cobra.Command{
 	Use:   "pull [image]",
 	Short: "Pulling images from Docker hub locally",
-	Run: func(cmd *cobra.Command, args []string) {
-		// 获取flag参数
-		tag, _ := cmd.Flags().GetString("tag")
-		arch, _ := cmd.Flags().GetString("arch")
-		osFlag, _ := cmd.Flags().GetString("os")
-		path, _ := cmd.Flags().GetString("path")
-		// 构造pull参数
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		tag, err := cmd.Flags().GetString("tag")
+		if err != nil {
+			return err
+		}
+		arch, err := cmd.Flags().GetString("arch")
+		if err != nil {
+			return err
+		}
+		osFlag, err := cmd.Flags().GetString("os")
+		if err != nil {
+			return err
+		}
+		path, err := cmd.Flags().GetString("path")
+		if err != nil {
+			return err
+		}
+
 		command := &pull.Flag{
 			Image:  args[0],
 			Tag:    tag,
@@ -23,19 +36,16 @@ var pullCommand = &cobra.Command{
 			OsFlag: osFlag,
 			Path:   path,
 		}
-		// 执行pull命令
-		_, err := pull.Execute(command)
-		if err != nil {
-			fmt.Println("Error pulling image", err)
-			return
+
+		if _, err := pull.Execute(command); err != nil {
+			return fmt.Errorf("pull image: %w", err)
 		}
+		return nil
 	},
 }
 
 func init() {
-	// 添加pull命令
 	rootCmd.AddCommand(pullCommand)
-	// 添加pull命令的flag
 	pullCommand.Flags().StringP("tag", "t", "latest", "pull image tag")
 	pullCommand.Flags().StringP("arch", "a", "amd64", "pull image arch")
 	pullCommand.Flags().StringP("os", "o", "linux", "pull image os")

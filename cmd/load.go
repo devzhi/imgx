@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+
 	"github.com/devzhi/imgx/internal/load"
 	"github.com/devzhi/imgx/internal/util"
 	"github.com/spf13/cobra"
@@ -10,44 +12,52 @@ import (
 var loadCommand = &cobra.Command{
 	Use:   "load",
 	Short: "Load the image to the remote host",
-	Run: func(cmd *cobra.Command, args []string) {
-		// 获取输入文件
+	RunE: func(cmd *cobra.Command, args []string) error {
 		input, err := cmd.Flags().GetString("input")
 		if err != nil {
-			fmt.Println("Error getting input file", err)
-			return
+			return err
 		}
-		// 获取flag参数
+		if input == "" {
+			return errors.New("input is required")
+		}
+
 		host, err := cmd.Flags().GetString("host")
 		if err != nil {
-			fmt.Println("Error getting host", err)
-			return
+			return err
 		}
 		if host == "" {
-			fmt.Println("Error: host is required")
-			return
+			return errors.New("host is required")
 		}
-		port, _ := cmd.Flags().GetInt("port")
+
+		port, err := cmd.Flags().GetInt("port")
+		if err != nil {
+			return err
+		}
 		username, err := cmd.Flags().GetString("username")
 		if err != nil {
-			fmt.Println("Error getting username", err)
-			return
+			return err
 		}
 		if username == "" {
-			fmt.Println("Error: username is required")
-			return
+			return errors.New("username is required")
 		}
+
 		password, err := util.ReadPassword()
 		if err != nil {
-			fmt.Println("Error reading password", err)
+			return fmt.Errorf("read password: %w", err)
 		}
 		if password == "" {
-			fmt.Println("Error: password is required")
-			return
+			return errors.New("password is required")
 		}
-		protocol, _ := cmd.Flags().GetString("protocol")
-		dockerPath, _ := cmd.Flags().GetString("docker-path")
-		// 构造load参数
+
+		protocol, err := cmd.Flags().GetString("protocol")
+		if err != nil {
+			return err
+		}
+		dockerPath, err := cmd.Flags().GetString("docker-path")
+		if err != nil {
+			return err
+		}
+
 		flag := &load.Flag{
 			InputFile:  input,
 			Host:       host,
@@ -58,15 +68,16 @@ var loadCommand = &cobra.Command{
 			Remove:     false,
 			DockerPath: dockerPath,
 		}
-		// 执行load命令
-		err = load.Execute(flag)
+
+		if err := load.Execute(flag); err != nil {
+			return fmt.Errorf("load image: %w", err)
+		}
+		return nil
 	},
 }
 
 func init() {
-	// 添加load命令
 	rootCmd.AddCommand(loadCommand)
-	// 添加load命令的flag
 	loadCommand.Flags().StringP("input", "i", "", "load image input file")
 	loadCommand.Flags().StringP("host", "H", "", "load image host")
 	loadCommand.Flags().IntP("port", "P", 22, "load image host's port")
