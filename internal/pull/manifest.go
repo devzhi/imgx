@@ -3,9 +3,11 @@ package pull
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/devzhi/imgx/internal/util"
 	"io"
 	"net/http"
+	"strings"
+
+	"github.com/devzhi/imgx/internal/util"
 )
 
 type ManifestsResp struct {
@@ -56,81 +58,86 @@ type Layer struct {
 }
 
 func GetManifest(token *TokenResponse, imageName, tag string, arch string, os string) (*ManifestsResp, error) {
-	// 构建请求
-	registryUrl := "https://registry.hub.docker.com/v2/"
+	registryURL := "https://registry.hub.docker.com/v2/"
 	if util.IsOfficialImage(imageName) {
-		registryUrl = registryUrl + "library/" + imageName
+		registryURL = registryURL + "library/" + imageName
 	} else {
-		registryUrl = registryUrl + imageName
+		registryURL = registryURL + imageName
 	}
-	req, err := http.NewRequest("GET", registryUrl+"/manifests/"+tag, nil)
+	req, err := http.NewRequest("GET", registryURL+"/manifests/"+tag, nil)
 	if err != nil {
 		fmt.Print("Error while creating manifest request", err)
 		return nil, err
 	}
-	// 添加请求头
 	req.Header.Set("Authorization", "Bearer "+token.Token)
 	req.Header.Set("Accept", "application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.docker.distribution.manifest.v2+json")
-	// 发送请求
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Print("Error while fetching manifest", err)
 		return nil, err
 	}
 	defer res.Body.Close()
-	// 读取响应
 	body, err := io.ReadAll(res.Body)
-	var resp ManifestsResp
-	err = json.Unmarshal(body, &resp)
 	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("fetch manifest: %s: %s", res.Status, strings.TrimSpace(string(body)))
+	}
+
+	var resp ManifestsResp
+	if err := json.Unmarshal(body, &resp); err != nil {
 		fmt.Print("Error while parsing manifest response ", err)
 		return nil, err
 	}
-	// 查找当前架构的manifest
-	if resp.MediaType == "application/vnd.oci.image.index.v1+json" {
+	if isManifestList(resp.MediaType) {
 		for _, manifest := range resp.Manifests {
 			if manifest.Platform.Architecture == arch && manifest.Platform.Os == os {
-				// 获取目标架构的manifest
 				return GetManifestByDigest(token, imageName, manifest.Digest)
 			}
 		}
 		fmt.Printf("No matching manifest found for %s/%s\n", arch, os)
 		return nil, fmt.Errorf("no matching manifest found for %s/%s", arch, os)
-	} else {
-		return &resp, nil
 	}
+	return &resp, nil
 }
 
 func GetManifestByDigest(token *TokenResponse, imageName, digest string) (*ManifestsResp, error) {
-	// 构建请求
-	registryUrl := "https://registry.hub.docker.com/v2/"
+	registryURL := "https://registry.hub.docker.com/v2/"
 	if util.IsOfficialImage(imageName) {
-		registryUrl = registryUrl + "library/" + imageName + "/manifests/" + digest
+		registryURL = registryURL + "library/" + imageName + "/manifests/" + digest
 	} else {
-		registryUrl = registryUrl + imageName + "/manifests/" + digest
+		registryURL = registryURL + imageName + "/manifests/" + digest
 	}
-	req, err := http.NewRequest("GET", registryUrl, nil)
+	req, err := http.NewRequest("GET", registryURL, nil)
 	if err != nil {
 		fmt.Print("Error while creating manifest request", err)
 		return nil, err
 	}
-	// 添加请求头
 	req.Header.Set("Authorization", "Bearer "+token.Token)
 	req.Header.Set("Accept", "application/vnd.docker.distribution.manifest.v2+json")
-	// 发送请求
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Print("Error while fetching manifest", err)
 		return nil, err
 	}
 	defer res.Body.Close()
-	// 读取响应
 	body, err := io.ReadAll(res.Body)
-	var resp ManifestsResp
-	err = json.Unmarshal(body, &resp)
 	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("fetch manifest by digest: %s: %s", res.Status, strings.TrimSpace(string(body)))
+	}
+
+	var resp ManifestsResp
+	if err := json.Unmarshal(body, &resp); err != nil {
 		fmt.Print("Error while parsing manifest response", err)
 		return nil, err
 	}
 	return &resp, nil
+}
+
+func isManifestList(mediaType string) bool {
+	return mediaType == "application/vnd.oci.image.index.v1+json" || mediaType == "application/vnd.docker.distribution.manifest.list.v2+json"
 }

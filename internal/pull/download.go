@@ -2,7 +2,6 @@ package pull
 
 import (
 	"fmt"
-	"github.com/devzhi/imgx/internal/util"
 	"io"
 	"net/http"
 	"os"
@@ -10,69 +9,69 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/devzhi/imgx/internal/util"
 	"github.com/schollz/progressbar/v3"
 )
 
 // DownloadImage 根据提供的manifests下载镜像层和配置
 func DownloadImage(token *TokenResponse, manifests *ManifestsResp, arch string, operateSystem string, imageName string, tag string) (path *string, err error) {
-	registryUrl := "https://registry.hub.docker.com/v2"
+	registryURL := "https://registry.hub.docker.com/v2"
 	if manifests.MediaType != "application/vnd.oci.image.manifest.v1+json" && manifests.MediaType != "application/vnd.docker.distribution.manifest.v2+json" {
-		fmt.Println("Unsupported manifest type", manifests.MediaType)
-		return nil, err
+		return nil, fmt.Errorf("unsupported manifest type: %s", manifests.MediaType)
 	}
 
-	// 创建镜像目录
 	temp, err := os.MkdirTemp("", "tmp-")
 	if err != nil {
 		return nil, err
 	}
 	dir := filepath.Join(temp, strings.ReplaceAll(imageName, "/", "_")+"_"+tag+"_"+arch+"_"+operateSystem)
-	err = os.Mkdir(dir, 0755)
-	if err != nil {
+	if err := os.MkdirAll(dir, 0o755); err != nil {
 		fmt.Println("Error while creating directory", err)
 		return nil, err
 	}
 
-	var layers []Layer
+	layers := make([]Layer, len(manifests.Layers))
+	errCh := make(chan error, len(manifests.Layers))
 	var wg sync.WaitGroup
 	wg.Add(len(manifests.Layers))
-	for _, layer := range manifests.Layers {
-		// 下载每一层
-		go func() {
+	for i, layer := range manifests.Layers {
+		go func(index int, currentLayer Layer) {
 			defer wg.Done()
-			err := downloadLayer(token, registryUrl, imageName, layer, dir)
-			if err != nil {
-				fmt.Println("Error while downloading layer", err)
-				// 退出
-				os.Exit(1)
+			if downloadErr := downloadLayer(token, registryURL, imageName, currentLayer, dir); downloadErr != nil {
+				errCh <- downloadErr
+				return
 			}
-			layers = append(layers, layer)
-		}()
+			layers[index] = currentLayer
+		}(i, layer)
 	}
 	wg.Wait()
+	close(errCh)
+	for downloadErr := range errCh {
+		if downloadErr != nil {
+			_ = os.RemoveAll(temp)
+			return nil, downloadErr
+		}
+	}
 
-	// 下载配置文件
-	err = downloadConfig(token, registryUrl, manifests.Config, dir, imageName)
+	err = downloadConfig(token, registryURL, manifests.Config, dir, imageName)
 	if err != nil {
 		return nil, err
 	}
-	// 创建manifest文件
-	err = createManifestFile(manifests.Config, layers, imageName, tag, dir)
-	if err != nil {
+	if err := createManifestFile(manifests.Config, layers, imageName, tag, dir); err != nil {
 		return nil, err
 	}
 	return &dir, nil
 }
 
 // downloadLayer 下载单个层并显示进度条
-func downloadLayer(token *TokenResponse, registryUrl, imageName string, layer Layer, dir string) error {
-	requestUrl := registryUrl
+func downloadLayer(token *TokenResponse, registryURL, imageName string, layer Layer, dir string) error {
+	requestURL := registryURL
 	if util.IsOfficialImage(imageName) {
-		requestUrl = requestUrl + "/library/" + imageName + "/blobs/" + layer.Digest
+		requestURL = requestURL + "/library/" + imageName + "/blobs/" + layer.Digest
 	} else {
-		requestUrl = requestUrl + "/" + imageName + "/blobs/" + layer.Digest
+		requestURL = requestURL + "/" + imageName + "/blobs/" + layer.Digest
 	}
-	req, err := http.NewRequest("GET", requestUrl, nil)
+	req, err := http.NewRequest("GET", requestURL, nil)
 	if err != nil {
 		fmt.Println("Error while creating layer request", err)
 		return err
@@ -86,7 +85,11 @@ func downloadLayer(token *TokenResponse, registryUrl, imageName string, layer La
 		return err
 	}
 	defer res.Body.Close()
-	// 创建文件保存层
+	if res.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(res.Body)
+		return fmt.Errorf("fetch layer %s: %s: %s", layer.Digest, res.Status, strings.TrimSpace(string(body)))
+	}
+
 	file, err := os.Create(dir + "/" + strings.Split(layer.Digest, ":")[1] + ".tar")
 	if err != nil {
 		fmt.Println("Error while creating layer file", err)
@@ -94,13 +97,11 @@ func downloadLayer(token *TokenResponse, registryUrl, imageName string, layer La
 	}
 	defer file.Close()
 
-	// 创建进度条
 	bar := progressbar.DefaultBytes(
 		res.ContentLength,
-		"Downloading layer "+string(layer.Digest[7:19]),
+		"Downloading layer "+layer.Digest[7:19],
 	)
 
-	// 使用进度条复制响应体到文件
 	_, err = io.Copy(io.MultiWriter(file, bar), res.Body)
 	if err != nil {
 		fmt.Println("Error while writing layer file", err)
@@ -110,14 +111,14 @@ func downloadLayer(token *TokenResponse, registryUrl, imageName string, layer La
 }
 
 // downloadConfig 下载配置文件
-func downloadConfig(token *TokenResponse, registryUrl string, config Config, dir string, imageName string) error {
-	requestUrl := registryUrl
+func downloadConfig(token *TokenResponse, registryURL string, config Config, dir string, imageName string) error {
+	requestURL := registryURL
 	if util.IsOfficialImage(imageName) {
-		requestUrl = requestUrl + "/library/" + imageName + "/blobs/" + config.Digest
+		requestURL = requestURL + "/library/" + imageName + "/blobs/" + config.Digest
 	} else {
-		requestUrl = requestUrl + "/" + imageName + "/blobs/" + config.Digest
+		requestURL = requestURL + "/" + imageName + "/blobs/" + config.Digest
 	}
-	req, err := http.NewRequest("GET", requestUrl, nil)
+	req, err := http.NewRequest("GET", requestURL, nil)
 	if err != nil {
 		fmt.Println("Error while creating config request", err)
 		return err
@@ -130,21 +131,22 @@ func downloadConfig(token *TokenResponse, registryUrl string, config Config, dir
 		return err
 	}
 	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(res.Body)
+		return fmt.Errorf("fetch config %s: %s: %s", config.Digest, res.Status, strings.TrimSpace(string(body)))
+	}
 
-	// 创建文件保存配置
 	file, err := os.Create(dir + "/" + strings.Split(config.Digest, ":")[1] + ".json")
 	if err != nil {
 		fmt.Println("Error while creating config file", err)
 		return err
 	}
 	defer file.Close()
-	// 创建进度条
 	bar := progressbar.DefaultBytes(
 		res.ContentLength,
-		"Downloading config "+string(config.Digest[7:19]),
+		"Downloading config "+config.Digest[7:19],
 	)
 
-	// 使用进度条复制响应体到文件
 	_, err = io.Copy(io.MultiWriter(file, bar), res.Body)
 	if err != nil {
 		fmt.Println("Error while writing config file", err)
@@ -192,8 +194,7 @@ func createManifestFile(config Config, layers []Layer, imageName, tag, dir strin
 
 func RemoveImageSaveDir(imageName, tag, arch, operateSystem string) {
 	dir := "./" + strings.ReplaceAll(imageName, "/", "_") + "_" + tag + "_" + arch + "_" + operateSystem
-	err := os.RemoveAll(dir)
-	if err != nil {
+	if err := os.RemoveAll(dir); err != nil {
 		fmt.Println("Error while removing directory", err)
 	}
 }

@@ -3,10 +3,12 @@ package pull
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/devzhi/imgx/internal/util"
 	"io"
 	"net/http"
+	"strings"
 	"time"
+
+	"github.com/devzhi/imgx/internal/util"
 )
 
 type TokenResponse struct {
@@ -17,8 +19,7 @@ type TokenResponse struct {
 }
 
 func GetToken(imageName string) (*TokenResponse, error) {
-	// 构建请求
-	authUrl := "https://auth.docker.io/token"
+	authURL := "https://auth.docker.io/token"
 	params := map[string]string{
 		"service": "registry.docker.io",
 	}
@@ -27,26 +28,29 @@ func GetToken(imageName string) (*TokenResponse, error) {
 	} else {
 		params["scope"] = "repository:" + imageName + ":pull"
 	}
-	// 发送请求
-	resp, err := http.Get(authUrl + "?service=" + params["service"] + "&scope=" + params["scope"])
+	resp, err := http.Get(authURL + "?service=" + params["service"] + "&scope=" + params["scope"])
 	if err != nil {
 		fmt.Print("Error while fetching token", err)
 		return nil, err
 	}
-	// 读取响应
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Print("Error while closing response body", err)
+	defer func(body io.ReadCloser) {
+		if closeErr := body.Close(); closeErr != nil {
+			fmt.Print("Error while closing response body", closeErr)
 		}
 	}(resp.Body)
+
 	body, err := io.ReadAll(resp.Body)
-	var tokenResponse TokenResponse
-	err = json.Unmarshal(body, &tokenResponse)
 	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("fetch token: %s: %s", resp.Status, strings.TrimSpace(string(body)))
+	}
+
+	var tokenResponse TokenResponse
+	if err := json.Unmarshal(body, &tokenResponse); err != nil {
 		fmt.Print("Error while parsing token response", err)
 		return nil, err
 	}
-	// 返回结果
 	return &tokenResponse, nil
 }
