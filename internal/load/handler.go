@@ -3,6 +3,7 @@ package load
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -87,5 +88,7 @@ func Execute(flag *Flag) error {
 }
 
 func buildRemotePath(tempDir, inputFile string) string {
-	return strings.ReplaceAll(filepath.Join(tempDir, filepath.Base(inputFile)), "\\", "/")
+	normalizedInput := strings.ReplaceAll(inputFile, "\\", "/")
+	base := path.Base(normalizedInput)
+	return strings.ReplaceAll(filepath.Join(tempDir, base), "\\", "/")
 }
